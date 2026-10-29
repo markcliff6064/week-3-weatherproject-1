@@ -216,3 +216,66 @@ function filterDailyForecast(list) {
     return allDays.slice(1, 6);
 }
 
+
+// Save a successfully searched city in localStorage.
+function saveToHistory(city) {
+    let history = JSON.parse(
+        localStorage.getItem("weather-history")
+    ) || [];
+
+    // Remove an existing copy so cities are not duplicated.
+    history = history.filter(function(item) {
+        return item.toLowerCase() !== city.toLowerCase();
+    });
+
+    // Put the latest city at the beginning.
+    history.unshift(city);
+
+    // Keep only the five most recent cities.
+    history = history.slice(0, 5);
+
+    // Save the updated list in the browser.
+    localStorage.setItem("weather-history", JSON.stringify(history));
+
+    // Refresh the history buttons.
+    renderSearchHistory();
+}
+
+// Display the saved cities as clickable buttons.
+function renderSearchHistory() {
+    const history = JSON.parse(
+        localStorage.getItem("weather-history")
+    ) || [];
+
+    // Remove the old buttons before creating new ones.
+    searchHistoryContainer.innerHTML = "";
+
+    history.forEach(function(city) {
+        const button = document.createElement("button");
+        button.className = "history-btn";
+        button.textContent = city;
+
+        // Search the city again when its button is clicked.
+        button.addEventListener("click", function() {
+            cityInput.value = city;
+            searchWeather(city);
+        });
+
+        searchHistoryContainer.appendChild(button);
+    });
+}
+
+// Search when the Search button is clicked.
+searchBtn.addEventListener("click", function() {
+    searchWeather(cityInput.value);
+});
+
+// Also allow searching by pressing Enter.
+cityInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        searchWeather(cityInput.value);
+    }
+});
+
+// Show previously saved search history when the page opens.
+renderSearchHistory();
